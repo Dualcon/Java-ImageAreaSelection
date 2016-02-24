@@ -28,8 +28,9 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel {
 
-	private File dir;
-	private ArrayList<File> result;
+	//private File dir;
+	private File[] files;
+	//private ArrayList<File> result;
 
 	private JLabel screenLabel;
 	private Image image;
@@ -41,22 +42,23 @@ public class MyPanel extends JPanel {
 	private Rectangle captureRectCopy;
 
 	public MyPanel() {
-		openDialog();
 		this.captureRect = null;
 		this.captureRectCopy = null;
 
-		this.dir = new File("C:\\Development\\data\\images\\");
-		if (! this.dir.exists()) {
-			JOptionPane.showMessageDialog(null, "Select a folder with images.");
-			return;
-		}
+		this.files = openDialog();
+		//this.dir = new File("C:\\Development\\data\\images\\");
+		//if (this.dir == null) {
+		//JOptionPane.showMessageDialog(null, "Select a folder with images.");
+		//return;
+		//}
 
-		this.result = new ArrayList<File>();
-		this.displayDirectoryContents(this.dir, this.result);
+		//this.result = new ArrayList<File>();
+		//this.displayDirectoryContents(this.dir, this.result);
 
 		this.image = null;
 		try {
-			image = ImageIO.read(new File(this.result.get(0).getAbsolutePath()));
+			//image = ImageIO.read(new File(this.result.get(0).getAbsolutePath()));
+			image = ImageIO.read(new File(this.files[0].getAbsolutePath()));
 			this.currentSelectedImage = 1;
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -178,19 +180,22 @@ public class MyPanel extends JPanel {
 	public void nextImage() {
 		if (this.captureRect != null) {
 
-			if (this.currentSelectedImage != this.result.size()) {
+			//if (this.currentSelectedImage != this.result.size()) {
+			if (this.currentSelectedImage != this.files.length) {
 				try {
-					this.image = ImageIO.read(new File(this.result.get(this.currentSelectedImage).getAbsolutePath()));
+					//this.image = ImageIO.read(new File(this.result.get(this.currentSelectedImage).getAbsolutePath()));
+					this.image = ImageIO.read(new File(this.files[this.currentSelectedImage].getAbsolutePath()));
 					this.currentSelectedImage +=1;
 					this.screen = (BufferedImage) this.image;
 					this.screenCopy = new BufferedImage(this.screen.getWidth(), this.screen.getHeight(), this.screen.getType());
 					this.screenLabel.setIcon(new ImageIcon(this.screenCopy));
-					System.out.println(captureRectCopy);
 					this.autoRepaint(this.screen, this.screenCopy);
 					this.screenLabel.repaint();
 				} catch (IOException e) {
 					e.printStackTrace();
-				}	
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "There are no more images to display.");
 			}
 
 		} else {
@@ -239,13 +244,22 @@ public class MyPanel extends JPanel {
 		}
 	}
 
-	private void openDialog() {
+	private File[] openDialog() {
+		/*
+		File folder = null;		
 		JFileChooser fc = new JFileChooser();
 		fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		int returnVal = fc.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fc.getSelectedFile();
+			folder = fc.getSelectedFile();
 		}
+		return folder;
+		 */
+		JFileChooser chooser = new JFileChooser();
+		chooser.setMultiSelectionEnabled(true);
+		chooser.showOpenDialog(this);
+		File[] files = chooser.getSelectedFiles();
+		return files;
 	}
 
 	private void saveDialog() {
