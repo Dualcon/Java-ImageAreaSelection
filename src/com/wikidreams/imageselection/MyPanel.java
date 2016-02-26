@@ -16,7 +16,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -160,22 +159,22 @@ public class MyPanel extends JPanel {
 		g.dispose();
 	}
 
-	private void displayDirectoryContents(File dir, ArrayList<File> result) {
-		try {
-			File[] files = dir.listFiles();
-			for (File file : files) {
-				if (file.isDirectory()) {
-					//System.out.println("directory:" + file.getAbsolutePath());
-					displayDirectoryContents(file, result);
-				} else {
-					//System.out.println("     file:" + file.getAbsolutePath());
-					result.add(new File(file.getAbsolutePath()));
-				}		
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	//private void displayDirectoryContents(File dir, ArrayList<File> result) {
+	//		try {
+	//File[] files = dir.listFiles();
+	//for (File file : files) {
+	//				if (file.isDirectory()) {
+	////System.out.println("directory:" + file.getAbsolutePath());
+	//displayDirectoryContents(file, result);
+	//} else {
+	//System.out.println("     file:" + file.getAbsolutePath());
+	//result.add(new File(file.getAbsolutePath()));
+	//}		
+	//}
+	//} catch (Exception e) {
+	//			e.printStackTrace();
+	//}
+	//}
 
 	public void nextImage() {
 		if (this.captureRect != null) {
@@ -235,10 +234,11 @@ public class MyPanel extends JPanel {
 	}
 
 
-	public void createImageFromSelectedRegion() {
+	private void createImageFromSelectedRegion(File file) {
 		try {
 			BufferedImage selectedImage = this.screen.getSubimage(this.captureRect.x, this.captureRect.y, this.captureRect.width, this.captureRect.height);
-			ImageIO.write(selectedImage, "jpg", new File("c:\\output.jpg"));
+			//ImageIO.write(selectedImage, "jpg", new File("c:\\output.jpg"));
+			ImageIO.write(selectedImage, "jpg", file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -262,11 +262,12 @@ public class MyPanel extends JPanel {
 		return files;
 	}
 
-	private void saveDialog() {
-		final JFileChooser fc = new JFileChooser();
+	public void saveDialog() {
+		JFileChooser fc = new JFileChooser();
+		fc.setSelectedFile(new File(this.files[this.currentSelectedImage].getName()));	
 		int returnVal = fc.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-
+			createImageFromSelectedRegion(fc.getSelectedFile());
 		}
 	}
 

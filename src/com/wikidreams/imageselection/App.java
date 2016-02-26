@@ -27,10 +27,10 @@ public class App {
 							panel.nextImage();	
 						}
 						if (e.getKeyChar() == 's') {
-							panel.saveCoordinatesFromSelectedRegion();	
+							
 						}
 						if (e.getKeyChar() == 'c') {
-							panel.createImageFromSelectedRegion();	
+							panel.saveDialog();
 						}
 					}
 
