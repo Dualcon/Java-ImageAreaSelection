@@ -27,7 +27,8 @@ public class App {
 							panel.nextImage();
 							panel.test();
 						}
-						if (e.getKeyChar() == 's') {
+						if (e.getKeyChar() == 'm') {
+						panel.marqRectangle();
 						}
 						if (e.getKeyChar() == 'c') {
 							panel.saveDialog();

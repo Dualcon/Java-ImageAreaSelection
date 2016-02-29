@@ -36,11 +36,13 @@ public class MyPanel extends JPanel {
 	private int currentSelectedImage;
 
 	private Rectangle captureRect;
-
+private Boolean rectangleIsCreated;
+	
 
 	public MyPanel() {
 		this.image = null;
 		this.captureRect = null;
+		this.rectangleIsCreated = false;
 
 		this.setLayout(new BorderLayout());
 		this.screenLabel = new JLabel(this.icon = new ImageIcon());
@@ -55,17 +57,18 @@ public class MyPanel extends JPanel {
 
 			@Override
 			public void mouseMoved(MouseEvent me) {
-				if (captureRect == null) {
+				if (! rectangleIsCreated) {
 					start = me.getPoint();
 					repaint(screen, screenCopy);
 					selectionLabel.setText("Start Point: " + start);
 					screenLabel.repaint();
+					System.out.println("passa");
 				}
 			}
 
 			@Override
 			public void mouseDragged(MouseEvent me) {
-				if (start != null) {
+				if (! rectangleIsCreated) {
 					Point end = me.getPoint();
 					captureRect = new Rectangle(start, new Dimension(end.x-start.x, end.y-start.y));
 					repaint(screen, screenCopy);
@@ -170,7 +173,7 @@ public class MyPanel extends JPanel {
 
 	public void saveDialog() {
 		JFileChooser fc = new JFileChooser();
-		fc.setSelectedFile(new File(this.files[this.currentSelectedImage].getName()));	
+		fc.setSelectedFile(new File(this.files[this.currentSelectedImage - 1].getName()));	
 		int returnVal = fc.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			createImageFromSelectedRegion(fc.getSelectedFile());
@@ -253,5 +256,8 @@ public class MyPanel extends JPanel {
 
 	//}
 
-
+	public void marqRectangle() {
+		this.rectangleIsCreated = true;
+	}
+	
 }
