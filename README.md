@@ -3,8 +3,8 @@ With this tool, it is easy split images with the same racio. Load some image fil
 
 # Shortcuts
 
-m - define the dimensions of your rectangle.
-d - Load next image.
-c - Create a new image with just the slected region.
+## m - define the dimensions of your rectangle.
+## d - Load next image.
+## c - Create a new image with just the slected region.
 
 Produced by [Wiki Dreams.github.io](https://WikiDreams.github.io/).
