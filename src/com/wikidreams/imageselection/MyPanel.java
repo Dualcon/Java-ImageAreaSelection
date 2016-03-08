@@ -25,11 +25,13 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel {
 
+
 	private File[] files;
 
 	private JLabel screenLabel;
 	private ImageIcon icon;
 	private Image image;
+
 	private BufferedImage screen;
 	private BufferedImage screenCopy;
 	private int currentSelectedImage;
@@ -37,11 +39,17 @@ public class MyPanel extends JPanel {
 	private Rectangle captureRect;
 	private Boolean rectangleIsCreated;
 
+	/* Resize the images on screen */
+	private Double windowWidth;
+	private Double windowHeight;
+
 
 	public MyPanel() {
 		this.image = null;
 		this.captureRect = null;
 		this.rectangleIsCreated = false;
+		this.windowWidth = 1024.0;
+		this.windowHeight = 768.0;
 
 		this.setLayout(new BorderLayout());
 		this.screenLabel = new JLabel(this.icon = new ImageIcon());
@@ -109,8 +117,8 @@ public class MyPanel extends JPanel {
 		}
 
 		nextImage();
-
 	}
+
 
 
 	public void nextImage() {
@@ -121,7 +129,7 @@ public class MyPanel extends JPanel {
 		}
 
 		try {
-			this.image = imageResize(ImageIO.read(new File(this.files[this.currentSelectedImage].getAbsolutePath())));
+			this.image = imageResize(ImageIO.read(new File(this.files[this.currentSelectedImage].getAbsolutePath())), this.windowWidth, this.windowHeight);
 			this.screen = (BufferedImage) this.image;
 			this.screenCopy = new BufferedImage(this.screen.getWidth(), this.screen.getHeight(), this.screen.getType());
 			this.screenLabel.setPreferredSize(new Dimension(this.screen.getWidth(), this.screen.getHeight()));
@@ -133,8 +141,8 @@ public class MyPanel extends JPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
+
 
 
 	private void repaint(BufferedImage orig, BufferedImage copy) {
@@ -150,14 +158,13 @@ public class MyPanel extends JPanel {
 	}
 
 
-	private void createImageFromSelectedRegion(File file) {
-		try {
-			BufferedImage selectedImage = this.screen.getSubimage(this.captureRect.x, this.captureRect.y, this.captureRect.width, this.captureRect.height);
-			ImageIO.write(selectedImage, "jpg", file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+	private BufferedImage createImageFromSelectedRegion() {
+		BufferedImage selectedRegion = this.screen.getSubimage(this.captureRect.x, this.captureRect.y, this.captureRect.width, this.captureRect.height);
+		System.out.println("Selected region - W: " + selectedRegion.getWidth() + " H: " + selectedRegion.getHeight());
+		return selectedRegion;
 	}
+
 
 
 	private File[] openDialog() {
@@ -169,32 +176,38 @@ public class MyPanel extends JPanel {
 	}
 
 
+
 	public void saveDialog() {
 		JFileChooser fc = new JFileChooser();
 		fc.setSelectedFile(new File(this.files[this.currentSelectedImage - 1].getName()));	
 		int returnVal = fc.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			createImageFromSelectedRegion(fc.getSelectedFile());
+			BufferedImage imageFromSelection = this.createImageFromSelectedRegion();
+			try {
+				ImageIO.write(imageFromSelection, "jpg", fc.getSelectedFile());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 
-	private BufferedImage imageResize(Image image) {
+
+	private BufferedImage imageResize(Image image, Double width, Double height) {
 		BufferedImage originalImage = (BufferedImage) image;
 
-		if ((originalImage.getWidth() <= 1024) && (originalImage.getWidth() <= 768)) {
+		if ((originalImage.getWidth() <= width) && (originalImage.getWidth() <= height)) {
 			return originalImage;
 		}
 
-		double windowRatio = (double) 1024 / 768;
+		double windowRatio = width / height;
 		double imageRatio = (double) originalImage.getWidth() / originalImage.getHeight();
-		System.out.println("original w:" + originalImage.getWidth() + " h:" + originalImage.getHeight());
 
 		double scaleRatio = 0.0;
 		if (windowRatio > imageRatio) {
-			scaleRatio = 768.0/ originalImage.getHeight();
+			scaleRatio = height / originalImage.getHeight();
 		} else {
-			scaleRatio = 1024.0 / originalImage.getWidth();
+			scaleRatio = width / originalImage.getWidth();
 		}
 
 		BufferedImage scaledBI = null;
@@ -219,44 +232,13 @@ public class MyPanel extends JPanel {
 		return scaledBI;
 	}
 
-	public void test() {
-		System.out.println(this.captureRect);	
-	}
 
-
-	//public void saveCoordinatesFromSelectedRegion() {
-	//		try {
-
-	//String content = "";
-	//if (this.captureRectCopy == null) {
-	//content = captureRect.toString();
-	//} else {
-	//				content = captureRectCopy.toString();
-	//}
-
-	//File file = new File("C:\\Development\\data\\images\\info.txt");
-
-	// if file doesnt exists, then create it
-	//if (!file.exists()) {
-	//file.createNewFile();
-	//}
-
-	//FileWriter fw = new FileWriter(file.getAbsoluteFile());
-	//BufferedWriter bw = new BufferedWriter(fw);
-	//bw.write(content);
-	//bw.close();
-	//JOptionPane.showMessageDialog(null, "File saved.");
-	//} catch (HeadlessException e) {
-	//			e.printStackTrace();
-	//} catch (IOException e) {
-	//			JOptionPane.showMessageDialog(null, "The system cannot find the path specified");
-	//}
-
-	//}
 
 	public void marqRectangle() {
 		this.rectangleIsCreated = true;
 	}
+
+
 
 	public void getImageProperties() {
 		for (File file : this.files) {
@@ -268,5 +250,25 @@ public class MyPanel extends JPanel {
 			}
 		}
 	}
+
+
+
+	public void exportSelectedRegionWithNewDimensions() {
+		JFileChooser fc = new JFileChooser();
+		fc.setSelectedFile(new File(this.files[this.currentSelectedImage - 1].getName()));	
+		int returnVal = fc.showSaveDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			// Get selected region.
+			BufferedImage imageFromSelection = this.createImageFromSelectedRegion();
+			// Resize selected region.
+			BufferedImage resizedImageFromSelection = this.imageResize(imageFromSelection, 50.0, 50.0);			
+			try {
+				ImageIO.write(resizedImageFromSelection, "jpg", fc.getSelectedFile());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 }

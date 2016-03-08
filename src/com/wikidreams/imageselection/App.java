@@ -25,7 +25,6 @@ public class App {
 					public void keyTyped(KeyEvent e) {
 						if (e.getKeyChar() == 'n') {
 							panel.nextImage();
-							panel.test();
 						}
 						if (e.getKeyChar() == 'm') {
 							panel.marqRectangle();
@@ -35,6 +34,9 @@ public class App {
 						}
 						if (e.getKeyChar() == 'p') {
 							panel.getImageProperties();
+						}
+						if (e.getKeyChar() == 'r') {
+							panel.exportSelectedRegionWithNewDimensions();
 						}
 					}
 

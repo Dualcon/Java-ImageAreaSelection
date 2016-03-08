@@ -3,9 +3,11 @@ With this tool, it is easy split images with the same racio. Load some image fil
 
 # Shortcuts
 
-## m - defines the dimensions of your rectangle.
+## m - Defines the dimensions of a drawed rectangle.
 ## n - Loads the next image.
-## c - Creates a new image with just the slected region.
-## p - Shows the dimension of each image.
+## c - Exports a new image with the selected region.
+## r - Exports a new image with the selected region and resize it to a specified width andheight.  
+## p - Shows the dimension of loaded images.
+
 
 Produced by [Wiki Dreams.github.io](https://WikiDreams.github.io/).
