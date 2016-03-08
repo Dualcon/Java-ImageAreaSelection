@@ -23,15 +23,18 @@ public class App {
 				frame.addKeyListener(new KeyListener() {
 					@Override
 					public void keyTyped(KeyEvent e) {
-						if (e.getKeyChar() == 'd') {
+						if (e.getKeyChar() == 'n') {
 							panel.nextImage();
 							panel.test();
 						}
 						if (e.getKeyChar() == 'm') {
-						panel.marqRectangle();
+							panel.marqRectangle();
 						}
 						if (e.getKeyChar() == 'c') {
 							panel.saveDialog();
+						}
+						if (e.getKeyChar() == 'p') {
+							panel.getImageProperties();
 						}
 					}
 

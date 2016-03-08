@@ -25,7 +25,6 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel {
 
-
 	private File[] files;
 
 	private JLabel screenLabel;
@@ -36,8 +35,8 @@ public class MyPanel extends JPanel {
 	private int currentSelectedImage;
 
 	private Rectangle captureRect;
-private Boolean rectangleIsCreated;
-	
+	private Boolean rectangleIsCreated;
+
 
 	public MyPanel() {
 		this.image = null;
@@ -62,7 +61,6 @@ private Boolean rectangleIsCreated;
 					repaint(screen, screenCopy);
 					selectionLabel.setText("Start Point: " + start);
 					screenLabel.repaint();
-					System.out.println("passa");
 				}
 			}
 
@@ -259,5 +257,16 @@ private Boolean rectangleIsCreated;
 	public void marqRectangle() {
 		this.rectangleIsCreated = true;
 	}
-	
+
+	public void getImageProperties() {
+		for (File file : this.files) {
+			try {
+				BufferedImage image = ImageIO.read(file);
+				System.out.println(file.getName() + " - Width: " + image.getWidth() + " Height: " + image.getHeight());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }
