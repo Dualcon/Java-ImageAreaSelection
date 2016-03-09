@@ -38,6 +38,9 @@ public class App {
 						if (e.getKeyChar() == 'r') {
 							panel.exportSelectedRegionWithNewDimensions();
 						}
+						if (e.getKeyChar() == 'a') {
+							panel.resizeAllImagesToDefaultResolution();
+						}
 					}
 
 					@Override

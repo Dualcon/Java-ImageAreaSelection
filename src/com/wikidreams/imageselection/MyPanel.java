@@ -21,6 +21,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel {
@@ -122,20 +124,19 @@ public class MyPanel extends JPanel {
 
 
 	public void nextImage() {
-
 		if (this.currentSelectedImage == this.files.length) {
 			JOptionPane.showMessageDialog(null, "There are no more images to display.");
 			return;
 		}
 
 		try {
-			this.image = imageResize(ImageIO.read(new File(this.files[this.currentSelectedImage].getAbsolutePath())), this.windowWidth, this.windowHeight);
+			this.image = scaleImageInRatio(ImageIO.read(new File(this.files[this.currentSelectedImage].getAbsolutePath())), this.windowWidth, this.windowHeight);
 			this.screen = (BufferedImage) this.image;
 			this.screenCopy = new BufferedImage(this.screen.getWidth(), this.screen.getHeight(), this.screen.getType());
 			this.screenLabel.setPreferredSize(new Dimension(this.screen.getWidth(), this.screen.getHeight()));
 			this.icon.setImage(this.screenCopy);
 			this.screenLabel.setIcon(this.icon);
-			repaint(this.screen, this.screenCopy);					
+			this.repaint(this.screen, this.screenCopy);					
 			this.screenLabel.repaint();
 			this.currentSelectedImage +=1;
 		} catch (IOException e) {
@@ -193,16 +194,14 @@ public class MyPanel extends JPanel {
 
 
 
-	private BufferedImage imageResize(Image image, Double width, Double height) {
+	private BufferedImage scaleImageInRatio(Image image, Double width, Double height) {
 		BufferedImage originalImage = (BufferedImage) image;
-
 		if ((originalImage.getWidth() <= width) && (originalImage.getWidth() <= height)) {
 			return originalImage;
 		}
 
 		double windowRatio = width / height;
 		double imageRatio = (double) originalImage.getWidth() / originalImage.getHeight();
-
 		double scaleRatio = 0.0;
 		if (windowRatio > imageRatio) {
 			scaleRatio = height / originalImage.getHeight();
@@ -217,18 +216,24 @@ public class MyPanel extends JPanel {
 			int w = (int) wr;
 			int h = (int) hr;
 			System.out.println("New w: " + w + " h: " + h);
-
-			Boolean preserveAlpha = true;
-			int imageType = preserveAlpha ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
-			scaledBI = new BufferedImage(w, h, imageType);
-			Graphics2D g = scaledBI.createGraphics();
-			if (preserveAlpha) {
-				g.setComposite(AlphaComposite.Src);
-			}
-			g.drawImage(originalImage, 0, 0, w, h, null); 
-			g.dispose();
+			scaledBI = this.scaleImage(originalImage, w, h);
 		}
+		return scaledBI;
+	}
 
+
+
+
+	private BufferedImage scaleImage(BufferedImage image, int w, int h) {
+		Boolean preserveAlpha = true;
+		int imageType = preserveAlpha ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+		BufferedImage scaledBI = new BufferedImage(w, h, imageType);
+		Graphics2D g = scaledBI.createGraphics();
+		if (preserveAlpha) {
+			g.setComposite(AlphaComposite.Src);
+		}
+		g.drawImage(image, 0, 0, w, h, null); 
+		g.dispose();
 		return scaledBI;
 	}
 
@@ -261,7 +266,7 @@ public class MyPanel extends JPanel {
 			// Get selected region.
 			BufferedImage imageFromSelection = this.createImageFromSelectedRegion();
 			// Resize selected region.
-			BufferedImage resizedImageFromSelection = this.imageResize(imageFromSelection, 50.0, 50.0);			
+			BufferedImage resizedImageFromSelection = this.scaleImageInRatio(imageFromSelection, 50.0, 50.0);			
 			try {
 				ImageIO.write(resizedImageFromSelection, "jpg", fc.getSelectedFile());
 			} catch (IOException e) {
@@ -270,5 +275,62 @@ public class MyPanel extends JPanel {
 		}
 	}
 
+
+
+	public void resizeAllImagesToASpecificResolution() {
+		File dir = new File("c:\\neg");
+		if (! dir.exists()) {
+			dir.mkdir();
+		}
+		for (File file : this.files) {
+			try {
+				BufferedImage image = ImageIO.read(file);
+				BufferedImage resizedImage = this.scaleImageInRatio(image, 320.0, 240.0);
+				ImageIO.write(resizedImage, "jpg", new File(dir + "\\" + file.getName()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
+		}
+	}
+
+
+
+	public void resizeAllImagesToDefaultResolution() {
+		// Create the input dialog.
+		JTextField width = new JTextField();
+		width.setToolTipText("Width");
+		JTextField height = new JTextField();
+		height.setToolTipText("height");
+		Object[] message = {
+				"Width:", width,
+				"Height:", height 
+		};
+		int option = JOptionPane.showConfirmDialog(null, message, "Enter the new dimensions.", JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION) {
+			int w = 0;
+			int h = 0;
+			try {
+				w = Integer.parseInt(width.getText());
+				h = Integer.parseInt(height.getText());
+			} catch (NumberFormatException e1) {
+				e1.printStackTrace();
+				return;
+			}
+
+			JFileChooser fc = new JFileChooser();
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int returnVal = fc.showSaveDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				for (File file : this.files) {
+					try {
+						BufferedImage image = this.scaleImage(ImageIO.read(file), w, h);
+						ImageIO.write(image, "jpg", new File(fc.getSelectedFile() + "\\" + file.getName()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
 
 }
