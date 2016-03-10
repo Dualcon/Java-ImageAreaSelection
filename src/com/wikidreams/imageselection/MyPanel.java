@@ -12,8 +12,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -21,8 +24,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
 
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel {
@@ -323,14 +329,108 @@ public class MyPanel extends JPanel {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				for (File file : this.files) {
 					try {
-						BufferedImage image = this.scaleImage(ImageIO.read(file), w, h);
-						ImageIO.write(image, "jpg", new File(fc.getSelectedFile() + "\\" + file.getName()));
+						BufferedImage scaledImage = this.scaleImage(ImageIO.read(file), w, h);
+						/*
+						System.out.println("Welcome to OpenCV " + Core.VERSION);
+						System.load("C:\\Development\\data\\opencv\\build\\java\\x64\\opencv_java300.dll");
+						byte[] imageInBytes = this.bufferedImageToByte(scaledImage);
+						Mat originalImage = this.byteToMat(imageInBytes);
+						Mat mGray = new Mat(scaledImage.getWidth(), scaledImage.getHeight(), CvType.CV_8UC1);
+						originalImage.copyTo(mGray);
+						// Grayscale conversion
+						Imgproc.cvtColor(originalImage, mGray, Imgproc.COLOR_BGR2GRAY);
+						byte[] grayScaleImageInBytes = this.matToByte(mGray);
+						BufferedImage grayScaleImage = this.byteToBufferedImage(grayScaleImageInBytes);
+						 */
+						BufferedImage grayScale = this.toGrayScale(scaledImage);
+						ImageIO.write(grayScale, "jpg", new File(fc.getSelectedFile() + "\\" + file.getName()));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-				}
+				}	
 			}
 		}
 	}
+
+
+	private BufferedImage imageToBufferedImage(Image img) {
+		if (img instanceof BufferedImage) {
+			return (BufferedImage) img;
+		}
+		// Create a buffered image with transparency
+		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bimage.createGraphics();
+		bGr.drawImage(img, 0, 0, null);
+		bGr.dispose();
+		return bimage;
+	}
+
+
+
+	private BufferedImage byteToBufferedImage(byte[] image) {
+		try {
+			InputStream in = new ByteArrayInputStream(image);
+			BufferedImage bi = ImageIO.read(in);
+			return bi;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+
+	private byte[] bufferedImageToByte(BufferedImage image) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(image, "jpg", baos);
+			baos.flush();
+			byte[] imageInByte = baos.toByteArray();
+			baos.close();
+			return imageInByte;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	private byte[] matToByte(Mat mat) {
+		MatOfByte buf = new MatOfByte();
+		Imgcodecs.imencode(".jpg", mat, buf);
+		byte[] imageBytes = buf.toArray();
+		return imageBytes;
+	}
+
+
+	private Mat byteToMat(byte[] image) {
+		Mat mat = Imgcodecs.imdecode(new MatOfByte(image), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+		return mat;    
+	}
+
+
+	private void matToFile(Mat image, String path) {
+		Imgcodecs.imwrite(path, image);   
+	}
+
+
+	private BufferedImage toGrayScale(BufferedImage image) {
+		for(int i=0; i<image.getHeight(); i++){
+			for(int j=0; j<image.getWidth(); j++){
+				Color c = new Color(image.getRGB(j, i));
+				int red = (int)(c.getRed() * 0.299);
+				int green = (int)(c.getGreen() * 0.587);
+				int blue = (int)(c.getBlue() *0.114);
+				Color newColor = new Color(red+green+blue, red+green+blue,red+green+blue);
+				// More methods to color:
+				// brighter() It creates a new Color that is a brighter version of this Color.
+				// darker() It creates a new Color that is a darker version of this Color.
+				image.setRGB(j,i,newColor.getRGB());
+			}
+		}
+		return image;
+	}
+
 
 }
