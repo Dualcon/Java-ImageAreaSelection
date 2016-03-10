@@ -41,6 +41,9 @@ public class App {
 						if (e.getKeyChar() == 'a') {
 							panel.resizeAllImagesToDefaultResolution();
 						}
+						if (e.getKeyChar() == 'g') {
+							panel.enableGrayScale();
+						}
 					}
 
 					@Override

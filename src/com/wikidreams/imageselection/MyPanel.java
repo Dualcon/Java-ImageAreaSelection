@@ -51,6 +51,7 @@ public class MyPanel extends JPanel {
 	private Double windowWidth;
 	private Double windowHeight;
 
+	private Boolean grayScale;
 
 	public MyPanel() {
 		this.image = null;
@@ -58,6 +59,7 @@ public class MyPanel extends JPanel {
 		this.rectangleIsCreated = false;
 		this.windowWidth = 1024.0;
 		this.windowHeight = 768.0;
+		this.grayScale = false;
 
 		this.setLayout(new BorderLayout());
 		this.screenLabel = new JLabel(this.icon = new ImageIcon());
@@ -342,8 +344,12 @@ public class MyPanel extends JPanel {
 						byte[] grayScaleImageInBytes = this.matToByte(mGray);
 						BufferedImage grayScaleImage = this.byteToBufferedImage(grayScaleImageInBytes);
 						 */
-						BufferedImage grayScale = this.toGrayScale(scaledImage);
-						ImageIO.write(grayScale, "jpg", new File(fc.getSelectedFile() + "\\" + file.getName()));
+						if (this.grayScale) {
+							BufferedImage grayScale = this.toGrayScale(scaledImage);
+							ImageIO.write(grayScale, "jpg", new File(fc.getSelectedFile() + "\\" + file.getName()));
+							continue;
+						}
+						ImageIO.write(scaledImage, "jpg", new File(fc.getSelectedFile() + "\\" + file.getName()));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -430,6 +436,18 @@ public class MyPanel extends JPanel {
 			}
 		}
 		return image;
+	}
+
+
+
+	public void enableGrayScale() {
+		if (this.grayScale) {
+			this.grayScale = false;
+			JOptionPane.showMessageDialog(null, "Gray scale disable.");
+		} else {
+			this.grayScale = true;
+			JOptionPane.showMessageDialog(null, "Gray scale enable.");
+		}
 	}
 
 
